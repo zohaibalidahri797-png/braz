@@ -1,0 +1,48 @@
+// Cloudflare Workers configuration for BotDock Cloud (web application).
+//
+// IMPORTANT ARCHITECTURE NOTE:
+//   This Worker hosts the WEB APP (dashboard, auth, APIs, control plane).
+//   Persistent bot processes CANNOT run inside Cloudflare Workers — they run
+//   on the separate botdock-runtime service (see docs/RUNTIME-DEPLOYMENT.md).
+//   Point RUNTIME_SERVICE_URL at that service in production.
+//
+// Deploy workflow (build BEFORE deploy):
+//   bun run cf:build     # next build via OpenNext → .open-next/worker.js
+//   bun run cf:deploy    # uploads worker + static assets
+//
+// Secrets (set once with `wrangler secret put <NAME>`):
+//   APP_SECRET, RUNTIME_API_KEY, DATABASE_URL, RESEND_API_KEY,
+//   GOOGLE_CLIENT_ID/SECRET, GITHUB_CLIENT_ID/SECRET, STRIPE_SECRET_KEY,
+//   STRIPE_WEBHOOK_SECRET, TELEGRAM_BOT_TOKEN
+// Non-secret vars (set in the [vars] block or the dashboard):
+//   APP_URL, RUNTIME_SERVICE_URL, DEV_SHOW_EMAIL_LINKS=false, ...
+
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "botdock-cloud",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    // OpenNext emits the static asset directory here — do NOT invent another path.
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+    // The React app owns the routes (/, /login → 307 #/login, ...). The static
+    // Pages-option pages in public/ stay reachable ONLY at their exact *.html
+    // paths — "none" stops Workers from auto-serving /login → login.html, which
+    // would shadow the real app routes.
+    "html_handling": "none"
+  },
+  "observability": {
+    "enabled": true
+  },
+  // Example production vars (fill in real values or use `wrangler secret put`):
+  // "vars": {
+  //   "APP_URL": "https://botdock.example.com",
+  //   "RUNTIME_SERVICE_URL": "https://runtime.botdock.example.com",
+  //   "RUNTIME_EMBEDDED": "false",
+  //   "DEV_SHOW_EMAIL_LINKS": "false"
+  // },
+  // R2 incremental cache (optional, enable with open-next.config.ts):
+  // "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "botdock-cache" }]
+}
