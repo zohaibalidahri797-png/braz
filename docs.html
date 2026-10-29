@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docs — BotDock Cloud</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body data-page="Docs">
+<div class="public-shell" data-shell="root">
+  <div data-shell="header"></div>
+  <main class="public" id="main">
+    <section class="section" style="padding-top:10px">
+      <h2>Developer docs</h2>
+      <p class="section-sub">Everything you need to run, deploy and integrate BotDock Cloud.</p>
+      <div class="grid-2">
+        <div class="card">
+          <h3><span class="icon">🚀</span>Quick start</h3>
+          <p class="muted">Create an account → <a href="/deploy.html">New bot</a> → pick the <strong>Python keep-alive</strong> template → <strong>Create &amp; deploy</strong>. Watch the build log live on the bot page. Your first bot runs in under a minute.</p>
+        </div>
+        <div class="card">
+          <h3><span class="icon">🔌</span>API</h3>
+          <p class="muted">Every dashboard action is a documented REST call. Full contract (auth, bots, deployments, logs, env vars, plans, health): <span class="mono">docs/API-SPEC.md</span> in the source repository.</p>
+        </div>
+        <div class="card">
+          <h3><span class="icon">📦</span>Project format</h3>
+          <p class="muted">ZIP/TAR.GZ up to 20 MB. Python projects: <span class="mono">requirements.txt</span> or <span class="mono">pyproject.toml</span> + <span class="mono">main.py</span>. Node/Bun: <span class="mono">package.json</span> (<span class="mono">start</span> script or <span class="mono">index.js</span>). Entry points are auto-detected and shown before deploy.</p>
+        </div>
+        <div class="card">
+          <h3><span class="icon">🤖</span>Telegram tokens</h3>
+          <p class="muted">Store your bot token as a <strong>secret environment variable</strong> (Env vars tab, "secret" checked). Values are encrypted at rest, write-only from the browser, and injected into the bot process at start.</p>
+        </div>
+        <div class="card">
+          <h3><span class="icon">☁️</span>Self-hosting</h3>
+          <p class="muted">Deploy the backend (Workers/OpenNext) and runtime service yourself — see <span class="mono">docs/DEPLOYMENT.md</span>, <span class="mono">docs/STATIC-FRONTEND.md</span> and <span class="mono">docs/RUNTIME-DEPLOYMENT.md</span> in the repository.</p>
+        </div>
+        <div class="card">
+          <h3><span class="icon">⬇️</span>Downloads</h3>
+          <p class="muted">
+            <a href="/api/download?file=botdock-pages.zip">Static frontend (.zip)</a> — Cloudflare Pages Direct Upload ready.<br>
+            <a href="/api/download?file=botdock-cloud-fixed.zip">Full platform (.zip)</a> — frontend + backend + runtime service.
+          </p>
+        </div>
+      </div>
+      <div class="note warn mt-16"><span class="n-icon">⚠</span><div><strong>Honesty policy:</strong> this dashboard never fabricates status. If the runtime is offline, bots show RUNTIME_OFFLINE. If email isn't configured, verification says so. If billing isn't configured, upgrades say so.</div></div>
+    </section>
+  </main>
+  <div data-shell="footer"></div>
+</div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/demo.js"></script>
+<script src="/assets/js/app.js"></script>
+<script src="/assets/js/public-page.js"></script>
+</body>
+</html>

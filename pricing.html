@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing — BotDock Cloud</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<div class="public-shell" data-shell="root">
+  <div data-shell="header"></div>
+  <main class="public" id="main">
+    <section class="section" style="padding-top:10px">
+      <h2>Simple, honest pricing</h2>
+      <p class="section-sub">Every plan is free during launch. Billing activates only when a payment provider is configured.</p>
+      <div class="note info mb-16" id="plansNote" hidden></div>
+      <div class="plan-grid" id="planGrid">
+        <div class="card"><p>Loading plans…</p></div>
+      </div>
+      <div class="card mt-16">
+        <h3>What the limits mean</h3>
+        <p class="muted"><strong>Bots</strong> — concurrent bots on your account. <strong>Storage</strong> — per-bot workspace size (project + dependencies). <strong>Deployments</strong> — builds started per day. <strong>Log retention</strong> — how many log lines you can tail. Runtime policy per bot: memory/CPU/disk limits enforced by the execution runtime; bots that abuse resources are stopped, not billed.</p>
+      </div>
+    </section>
+  </main>
+  <div data-shell="footer"></div>
+</div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/demo.js"></script>
+<script src="/assets/js/app.js"></script>
+<script src="/assets/js/pages.js"></script>
+</body>
+</html>

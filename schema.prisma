@@ -1,0 +1,390 @@
+// BotDock Cloud — Prisma schema (SQLite for development)
+// NOTE: SQLite connector does not support enums; lifecycle states are String
+// columns validated in application code (see src/lib/validation.ts).
+// Production guidance: swap datasource to Postgres/Turso (see docs/DEPLOYMENT.md).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────── Accounts & Auth ───────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  passwordHash  String? // null when account created purely via OAuth
+  emailVerified DateTime?
+  role          String    @default("USER") // USER | ADMIN
+  status        String    @default("ACTIVE") // ACTIVE | SUSPENDED | BANNED
+  telegramChatId String? // optional Telegram broadcast delivery target
+  suspensionReason String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions        Session[]
+  oauthAccounts   OAuthAccount[]
+  bots            Bot[]
+  subscription    Subscription?
+  payments        Payment[]
+  notifications   Notification[]
+  usageRecords    UsageRecord[]
+  auditLogs       AuditLog[]
+  broadcastRecipients BroadcastRecipient[]
+  githubTokens    GithubToken[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique // SHA-256 of the session token (jti)
+  ip        String?
+  userAgent String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model OAuthAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String // google | github
+  providerAccountId String
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// type: EMAIL_VERIFY | PASSWORD_RESET
+model VerificationToken {
+  id        String    @id @default(cuid())
+  email     String
+  tokenHash String    @unique
+  type      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email, type])
+  @@index([expiresAt])
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  toEmail   String
+  subject   String
+  template  String
+  status    String // SENT | FAILED | SKIPPED
+  provider  String   @default("none") // resend | console | none
+  error     String?
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────── Plans & Billing ───────────────────────────────
+
+model Plan {
+  id          String  @id // slug: free | starter | pro | scale
+  name        String
+  description String  @default("")
+  priceMonthly Int    @default(0) // cents USD
+  priceYearly  Int    @default(0) // cents USD
+  isActive    Boolean @default(true)
+  isDefault   Boolean @default(false)
+  isPublic    Boolean @default(true)
+  sortOrder   Int     @default(0)
+  // JSON: { maxBots, memoryMbPerBot, cpuPercent, diskMbPerBot, storageTotalMb,
+  //         deploymentsPerDay, logRetentionDays, runtimes: ["PYTHON","NODE","BUN"],
+  //         allowedFeatures: { githubImport, fileEditor, envVars, prioritySupport } }
+  limits      String  @default("{}")
+  features    String  @default("[]") // JSON array of marketing feature strings
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@index([isActive])
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  planId      String
+  status      String   @default("ACTIVE") // ACTIVE | PAST_DUE | CANCELED
+  billingCycle String  @default("NONE") // NONE | MONTHLY | YEARLY
+  currentPeriodStart DateTime @default(now())
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean  @default(false)
+  provider    String   @default("NONE") // NONE | STRIPE | MANUAL
+  providerCustomerId    String?
+  providerSubscriptionId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     Plan     @relation(fields: [planId], references: [id])
+  payments Payment[]
+
+  @@index([planId])
+  @@index([status])
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  userId         String
+  subscriptionId String?
+  amount         Int // cents
+  currency       String   @default("USD")
+  status         String // PENDING | SUCCEEDED | FAILED | REFUNDED
+  provider       String   @default("MANUAL") // MANUAL | STRIPE
+  providerRef    String?
+  description    String   @default("")
+  createdAt      DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+}
+
+// ─────────────────────────────── Bots & Deployments ───────────────────────────────
+
+model Bot {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  description String  @default("")
+  runtime    String // PYTHON | NODE | BUN
+  status     String   @default("CREATED") // CREATED | BUILDING | DEPLOYING | RUNNING | STOPPED | FAILED | DELETING
+  startCommand String @default("")
+  sourceType String   @default("TEMPLATE") // TEMPLATE | UPLOAD | GITHUB
+  sourceRef  String   @default("") // template id or "owner/repo@branch"
+  currentDeploymentId String?
+  lastDeployedAt DateTime?
+  lastStartedAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deployments Deployment[]
+  envVars     EnvVar[]
+  usageRecords UsageRecord[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Deployment {
+  id           String   @id @default(cuid())
+  botId        String
+  number       Int
+  status       String   @default("QUEUED") // QUEUED | BUILDING | DEPLOYING | RUNNING | FAILED | CANCELED
+  sourceType   String // TEMPLATE | UPLOAD | GITHUB
+  sourceRef    String   @default("")
+  commitSha    String?
+  commitMessage String?
+  triggeredBy  String?
+  error        String?
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  createdAt    DateTime @default(now())
+
+  bot Bot @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@unique([botId, number])
+  @@index([botId])
+  @@index([status])
+}
+
+model EnvVar {
+  id        String   @id @default(cuid())
+  botId     String
+  key       String
+  valueEnc  String // AES-256-GCM encrypted at rest
+  isSecret  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bot Bot @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@unique([botId, key])
+}
+
+model UsageRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  botId     String?
+  kind      String // DEPLOYMENT | STORAGE_MB | LOG_VOLUME_KB | RUNTIME_SECONDS
+  amount    Float
+  unit      String
+  meta      String   @default("{}")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bot  Bot? @relation(fields: [botId], references: [id], onDelete: SetNull)
+
+  @@index([userId, kind, createdAt])
+  @@index([botId])
+}
+
+// ─────────────────────────────── Notifications & Broadcasts ───────────────────────────────
+
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  title       String
+  body        String
+  level       String    @default("INFO") // INFO | SUCCESS | WARNING | ERROR
+  category    String    @default("SYSTEM") // SYSTEM | DEPLOYMENT | BILLING | BROADCAST | SECURITY
+  link        String? // hash-route inside the SPA
+  readAt      DateTime?
+  broadcastId String?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+}
+
+model Broadcast {
+  id          String    @id @default(cuid())
+  title       String
+  body        String
+  level       String    @default("INFO")
+  category    String    @default("SYSTEM")
+  audience    String    @default("ALL") // ALL | VERIFIED | PLAN:free | SUSPENDED ...
+  channels    String    @default("[\"INAPP\"]") // JSON: INAPP | EMAIL | TELEGRAM
+  status      String    @default("DRAFT") // DRAFT | SCHEDULED | SENDING | SENT | PARTIAL | FAILED | CANCELED
+  scheduledFor DateTime?
+  sentAt      DateTime?
+  totalRecipients Int     @default(0)
+  delivered       Int     @default(0)
+  failed          Int     @default(0)
+  skipped         Int     @default(0)
+  createdBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  recipients BroadcastRecipient[]
+
+  @@index([status])
+}
+
+model BroadcastRecipient {
+  id          String   @id @default(cuid())
+  broadcastId String
+  userId      String
+  channel     String // INAPP | EMAIL | TELEGRAM
+  status      String   @default("QUEUED") // QUEUED | SENT | DELIVERED | FAILED | SKIPPED
+  error       String?
+  createdAt   DateTime @default(now())
+
+  broadcast Broadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([broadcastId])
+  @@index([userId])
+}
+
+// ─────────────────────────────── Admin & Platform ───────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorEmail String?
+  action     String // e.g. USER_LOGIN, BOT_CREATE, BROADCAST_SEND, PLAN_UPDATE
+  targetType String?
+  targetId   String?
+  detail     String   @default("{}") // JSON (secrets redacted)
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model PlatformSetting {
+  key       String   @id
+  value     String // JSON
+  updatedAt DateTime @updatedAt
+}
+
+model GithubToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenEnc  String // AES-256-GCM encrypted PAT
+  scopes    String   @default("")
+  label     String   @default("GitHub Personal Access Token")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─────────────────────────────── Monetization (config-driven) ───────────────────────────────
+// Ads / promo codes / referral credits are configured via PlatformSetting keys and the
+// Plan.features JSON — implemented as configuration + admin UI, no fabricated ad networks.
+
+model PromoCode {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  kind        String   @default("PERCENT_OFF") // PERCENT_OFF | RESOURCE_PACK
+  value       Int      @default(0) // percent or resource amount
+  resourceMeta String  @default("{}") // JSON for RESOURCE_PACK (bots/memory etc.)
+  maxRedemptions Int   @default(0) // 0 = unlimited
+  redemptions Int      @default(0)
+  expiresAt   DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([isActive])
+}
+
+model PromoRedemption {
+  id        String   @id @default(cuid())
+  codeId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([codeId, userId])
+}
+
+// ─────────────────────────────── Rate limiting (shared backend) ───────────────────────────────
+// Fixed-window buckets shared across instances/isolates (Cloudflare Workers
+// isolates do not share memory). Used by src/lib/rate-limit.ts when the
+// database is remote; local development uses the in-memory limiter.
+model RateLimitBucket {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([resetAt])
+}

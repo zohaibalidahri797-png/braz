@@ -1,0 +1,17 @@
+{
+  "name": "botdock-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "BotDock Cloud persistent bot runtime service: executes user-submitted bot code as isolated child processes and reports truthful, measured status.",
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "start": "bun src/index.ts"
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.1"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.6.0"
+  }
+}

@@ -1,0 +1,61 @@
+# BotDock Cloud — continuous integration.
+#
+# Checks the code and builds the application WITHOUT any real secrets:
+#   - DATABASE_URL / APP_SECRET are throwaway build-time placeholders
+#     (no route touches the database at build time; pages that read the DB
+#     are force-dynamic).
+#   - OAuth/Stripe/Resend/runtime keys are intentionally absent — the app
+#     treats them as "not configured" and the build does not need them.
+#
+# Deployment to Cloudflare is configured separately (Workers Builds or the
+# deploy step in docs/DEPLOYMENT.md) and requires account-level secrets.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Prisma — validate schema & generate client
+        run: bunx prisma validate && bunx prisma generate
+        env:
+          DATABASE_URL: "file:./db/ci-placeholder.db"
+
+      - name: TypeScript
+        run: bunx tsc --noEmit
+
+      - name: ESLint
+        run: bun run lint
+
+      - name: Unit tests (runtime configuration)
+        run: bun test tests/
+
+      - name: Production build
+        run: bun run build
+        env:
+          DATABASE_URL: "file:./db/ci-placeholder.db"
+          APP_SECRET: "ci-placeholder-secret-0123456789abcdef0123456789abcdef"
+          APP_URL: "http://localhost:3000"
+          NODE_ENV: production
+
+      - name: OpenNext Cloudflare build
+        run: bun run cf:build
+        env:
+          DATABASE_URL: "file:./db/ci-placeholder.db"
+          APP_SECRET: "ci-placeholder-secret-0123456789abcdef0123456789abcdef"
+          APP_URL: "http://localhost:3000"
+          NODE_ENV: production

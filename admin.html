@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — BotDock Cloud</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <div data-shell="header"></div>
+  <div class="app-body">
+    <main class="content" id="main"><div class="content-inner" style="max-width:920px">
+      <div class="page-head"><div><h1 class="mt-0">Administration</h1><p>Server-enforced: every admin endpoint rejects non-admin sessions.</p></div></div>
+
+      <div id="adminStatsWrap">
+        <div class="stats">
+          <div class="stat"><span class="label">Users</span><div class="value" id="adUsers">–</div><div class="sub"><span id="adVerified">–</span> verified</div></div>
+          <div class="stat"><span class="label">Bots running</span><div class="value" id="adBotsRunning">–</div></div>
+          <div class="stat"><span class="label">Bots failed</span><div class="value" id="adBotsFailed">–</div></div>
+          <div class="stat"><span class="label">Deploys 24h</span><div class="value" id="adDeploys24">–</div><div class="sub"><span id="adFailed24">–</span> failed</div></div>
+          <div class="stat"><span class="label">Runtime</span><div class="value" id="adRuntime" style="font-size:1.1rem">–</div></div>
+        </div>
+      </div>
+
+      <h2 class="mb-16">Users</h2>
+      <div id="adminUsers" class="mb-24"><p class="faint">Loading…</p></div>
+
+      <h2 class="mb-16">Audit log (latest)</h2>
+      <div id="adminAudit" class="mb-24"><p class="faint">Loading…</p></div>
+
+      <div class="note info"><span class="n-icon">ⓘ</span><div>More admin capabilities (plans editor, runtime provider settings, failed deployment queue) live in the backend API — see <a href="/docs.html">docs</a>. This page surfaces the read-side controls that exist today.</div></div>
+    </div></main>
+  </div>
+</div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/demo.js"></script>
+<script src="/assets/js/app.js"></script>
+<script src="/assets/js/pages.js"></script>
+</body>
+</html>

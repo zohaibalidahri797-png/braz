@@ -1,0 +1,22 @@
+# Cloudflare Pages redirect/proxy rules (Pages Direct Upload only).
+# This file is IGNORED when the backend Worker serves the static files.
+
+# ── Recommended: same-origin API proxy ────────────────────────────
+# Keep the frontend and API on ONE origin so session cookies work
+# with zero CORS configuration. Replace the target with your deployed
+# backend Worker URL, then remove the leading "# " to activate:
+#
+# /api/* https://botdock-cloud.YOUR-SUBDOMAIN.workers.dev/:splat 200
+
+# ── SPA-style convenience (optional) ─────────────────────────────
+# Send visitors to pretty paths instead of *.html (Pages serves the
+# file when it exists; this only catches misses):
+#
+# /dashboard /dashboard.html 200
+# /bots /bots.html 200
+# /deploy /deploy.html 200
+# /pricing /pricing.html 200
+# /settings /settings.html 200
+# /login /login.html 200
+# /register /register.html 200
+# /docs /docs.html 200

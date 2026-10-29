@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New bot — BotDock Cloud</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <div data-shell="header"></div>
+  <div class="app-body">
+    <main class="content" id="main"><div class="content-inner" style="max-width:760px">
+      <div class="page-head">
+        <div><h1 class="mt-0">Create a new bot</h1><p>Choose a source. The bot is created, then deployed to the runtime.</p></div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Bot source">
+        <button class="tab" data-tab="template" aria-selected="true" role="tab">Template</button>
+        <button class="tab" data-tab="upload" aria-selected="false" role="tab">Archive</button>
+        <button class="tab" data-tab="github" aria-selected="false" role="tab">GitHub</button>
+      </div>
+
+      <section class="tabpane" data-pane="template">
+        <div class="field">
+          <label for="botName">Bot name</label>
+          <input class="input" id="botName" placeholder="my-reminder-bot" maxlength="40">
+        </div>
+        <div class="field">
+          <label for="runtimeSel">Runtime</label>
+          <select class="input" id="runtimeSel">
+            <option value="PYTHON" selected>Python</option>
+            <option value="NODE">Node.js</option>
+            <option value="BUN">Bun</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="templateSel">Template</label>
+          <select class="input" id="templateSel"></select>
+          <div class="hint" id="templateInfo"></div>
+        </div>
+        <div class="field"><label for="botDesc">Description (optional)</label><input class="input" id="botDesc" maxlength="300"></div>
+        <div class="field"><label for="startCmd">Start command (optional)</label><input class="input mono" id="startCmd" placeholder="defaults to the template's command"></div>
+        <button class="btn btn-primary btn-lg" id="templateBtn">Create bot &amp; deploy</button>
+      </section>
+
+      <section class="tabpane" data-pane="upload" hidden>
+        <div class="dropzone mb-16" id="dropzone" role="button" tabindex="0" aria-label="Choose or drop an archive">
+          <div class="big">📦</div>
+          <strong>Drop a .zip / .tar.gz here</strong><br>
+          <span class="faint">or click to choose — max 20 MB · entry-point files like main.py, bot.js, package.json are detected</span>
+        </div>
+        <input type="file" id="fileInput" accept=".zip,.tar,.gz,.tgz,.jar" hidden>
+        <p class="faint" id="fileLabel">No file chosen</p>
+        <div class="field"><label for="uploadName">Bot name</label><input class="input" id="uploadName" placeholder="defaults to the archive name" maxlength="40"></div>
+        <div class="field"><label for="uploadRuntime">Runtime</label>
+          <select class="input" id="uploadRuntime">
+            <option value="PYTHON" selected>Python</option>
+            <option value="NODE">Node.js</option>
+            <option value="BUN">Bun</option>
+          </select></div>
+        <div class="field"><label for="uploadDesc">Description (optional)</label><input class="input" id="uploadDesc" maxlength="300"></div>
+        <div class="field"><label for="uploadStart">Start command (optional)</label><input class="input mono" id="uploadStart" placeholder="e.g. python3 main.py"></div>
+        <div class="progress mb-16" id="uploadProgressWrap" hidden><div id="uploadProgress"></div></div>
+        <p class="faint" id="uploadPct"></p>
+        <button class="btn btn-primary btn-lg" id="uploadBtn" disabled>Create bot &amp; deploy</button>
+      </section>
+
+      <section class="tabpane" data-pane="github" hidden>
+        <div id="repoList" class="mb-16"><div class="note info"><span class="n-icon">ⓘ</span><div>Open the GitHub tab to list your repositories (requires a token in Settings → GitHub).</div></div></div>
+        <div class="field"><label for="ghName">Bot name</label><input class="input" id="ghName" maxlength="40"></div>
+        <div class="field"><label for="repoInput">Repository (owner/name)</label><input class="input mono" id="repoInput" placeholder="octocat/hello-bot"></div>
+        <div class="field"><label for="branchSel">Branch</label><select class="input" id="branchSel"><option value="main">main</option></select></div>
+        <div class="field"><label for="ghRuntime">Runtime</label>
+          <select class="input" id="ghRuntime">
+            <option value="PYTHON" selected>Python</option>
+            <option value="NODE">Node.js</option>
+            <option value="BUN">Bun</option>
+          </select></div>
+        <div class="field"><label for="ghDesc">Description (optional)</label><input class="input" id="ghDesc" maxlength="300"></div>
+        <button class="btn btn-primary btn-lg" id="ghBtn">Import &amp; deploy</button>
+      </section>
+
+      <p class="form-error" id="deployError" role="alert"></p>
+      <div class="note info"><span class="n-icon">ⓘ</span><div>Archives are scanned for path traversal and unsafe contents before anything runs. Bots never execute inside the API — only inside the isolated runtime service.</div></div>
+    </div></main>
+  </div>
+</div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/demo.js"></script>
+<script src="/assets/js/app.js"></script>
+<script src="/assets/js/deploy.js"></script>
+</body>
+</html>

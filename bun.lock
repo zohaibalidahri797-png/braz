@@ -1,0 +1,20 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "botdock-runtime",
+      "dependencies": {
+        "adm-zip": "^0.6.1",
+      },
+      "devDependencies": {
+        "@types/adm-zip": "^0.6.0",
+      },
+    },
+  },
+  "packages": {
+    "@types/adm-zip": ["@types/adm-zip@0.6.0", "", { "dependencies": { "adm-zip": "*" } }, "sha512-4BJwT30zsKqyYk+PgJS+LQzVrLh0bHragg9etHGg679uuBbNDbSaLsJy+DaJQZM8AvESHB+t3ruVzbrn6BUsMQ=="],
+
+    "adm-zip": ["adm-zip@0.6.1", "", {}, "sha512-Xwrja8nx9e5o2N1my4DsKCeKpdrnACyr1wtbPxBDgGzKzKyE9kRtBFA8mWldI+RVlD7CBZNWY/wQ2+ydwOR6kQ=="],
+  }
+}

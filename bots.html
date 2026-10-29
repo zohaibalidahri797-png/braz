@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My bots — BotDock Cloud</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body data-page="bots">
+<div class="app-shell">
+  <div data-shell="header"></div>
+  <div class="app-body">
+    <main class="content" id="main"><div class="content-inner">
+      <div class="page-head">
+        <div><h1 class="mt-0">My bots</h1><p>Every bot you own, with live runtime status.</p></div>
+        <a class="btn btn-primary" href="/deploy.html">New bot</a>
+      </div>
+      <div class="toolbar">
+        <input class="input" id="botSearch" type="search" placeholder="Search bots…" aria-label="Search bots">
+        <select class="input" id="botFilter" aria-label="Filter by status">
+          <option value="ALL">All statuses</option>
+          <option value="RUNNING">Running</option>
+          <option value="STOPPED">Stopped</option>
+          <option value="CREATED">Created</option>
+          <option value="FAILED">Failed</option>
+        </select>
+      </div>
+      <div id="botsWrap"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
+      <div class="pagination" id="botsPag"></div>
+    </div></main>
+  </div>
+</div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/demo.js"></script>
+<script src="/assets/js/app.js"></script>
+<script src="/assets/js/dashboard.js"></script>
+</body>
+</html>

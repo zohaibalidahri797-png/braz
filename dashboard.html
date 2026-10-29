@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview — BotDock Cloud</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body data-page="dashboard">
+<div class="app-shell">
+  <div data-shell="header"></div>
+  <div class="app-body">
+    <main class="content" id="main"><div class="content-inner">
+      <div class="page-head">
+        <div><h1 class="mt-0" id="greet">Overview</h1><p>Your bots at a glance.</p></div>
+        <a class="btn btn-primary" href="/deploy.html">New bot</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="label">Bots</span><div class="value" id="stBots">–</div><div class="sub" id="planBar"></div></div>
+        <div class="stat"><span class="label">Running</span><div class="value" id="stRunning">–</div></div>
+        <div class="stat"><span class="label">Stopped</span><div class="value" id="stStopped">–</div></div>
+        <div class="stat"><span class="label">Failed</span><div class="value" id="stFailed">–</div></div>
+        <div class="stat"><span class="label">Deploys today</span><div class="value" id="stDeploys">–</div></div>
+        <div class="stat"><span class="label">Storage</span><div class="value" id="stStorage">–</div></div>
+      </div>
+      <h2 class="mb-16">Recent activity</h2>
+      <div id="activityList" class="mb-24"><div class="skeleton" style="height:44px"></div><div class="skeleton" style="height:44px"></div></div>
+      <div class="row mb-16">
+        <h2 class="mt-0">Your bots</h2>
+        <span class="right"><a href="/bots.html">View all →</a></span>
+      </div>
+      <div id="botsWrap"></div>
+      <div class="pagination" id="botsPag"></div>
+    </div></main>
+  </div>
+</div>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/demo.js"></script>
+<script src="/assets/js/app.js"></script>
+<script src="/assets/js/dashboard.js"></script>
+</body>
+</html>

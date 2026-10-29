@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bot — BotDock Cloud</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <div data-shell="header"></div>
+  <div class="app-body">
+    <main class="content" id="main"><div class="content-inner">
+      <button class="btn btn-ghost btn-sm mb-16" id="backBtn">← My bots</button>
+      <div class="detail-head">
+        <div>
+          <h1 class="mt-0" id="botTitle">Loading…</h1>
+          <p class="muted" id="botDesc"></p>
+        </div>
+      </div>
+      <div class="note warn mb-16" id="runtimeNote" hidden role="note"></div>
+      <div class="kv-grid" id="botKv"></div>
+      <div class="action-bar" role="toolbar" aria-label="Bot actions">
+        <button class="btn btn-primary" id="deployBtn">Deploy</button>
+        <button class="btn" id="startBtn">Start</button>
+        <button class="btn" id="stopBtn">Stop</button>
+        <button class="btn" id="restartBtn">Restart</button>
+        <span class="right"></span>
+        <button class="btn btn-danger" id="deleteBtn">Delete</button>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Bot sections">
+        <button class="tab" data-tab="overview" aria-selected="true" role="tab">Overview</button>
+        <button class="tab" data-tab="deployments" aria-selected="false" role="tab">Deployments</button>
+        <button class="tab" data-tab="logs" aria-selected="false" role="tab">Logs</button>
+        <button class="tab" data-tab="env" aria-selected="false" role="tab">Env vars</button>
+        <button class="tab" data-tab="files" aria-selected="false" role="tab">Files</button>
+      </div>
+
+      <section class="tabpane" data-pane="overview">
+        <h3>Latest deployment</h3>
+        <p class="muted" id="lastDep">—</p>
+        <h3>How status works</h3>
+        <p class="muted">Status comes from the runtime service's live process table — CREATED → BUILDING → DEPLOYING → RUNNING (or FAILED, with the real error). Nothing is marked running unless the runtime confirms it.</p>
+      </section>
+
+      <section class="tabpane" data-pane="deployments" hidden>
+        <div id="depList"><p class="faint">Loading…</p></div>
+      </section>
+
+      <section class="tabpane" data-pane="logs" hidden>
+        <div class="row mb-16">
+          <button class="btn btn-sm" id="logReload">Reload</button>
+          <label class="checkbox-row"><input type="checkbox" id="logAuto" checked> Auto-refresh while running</label>
+          <span class="faint right" id="logMeta"></span>
+        </div>
+        <div class="logbox" id="logBox" aria-live="polite" aria-label="Runtime log output"></div>
+      </section>
+
+      <section class="tabpane" data-pane="env" hidden>
+        <div class="note info mb-16" id="envNoteWrap"><span class="n-icon">🔐</span><div id="envNote">Secret values are encrypted at rest and can never be viewed after saving. Restart or redeploy to apply changes.</div></div>
+        <div class="row mb-16">
+          <input class="input mono" id="envKey" placeholder="KEY_NAME" style="max-width:220px" aria-label="Variable name">
+          <input class="input mono" id="envValue" placeholder="value" style="max-width:260px" aria-label="Variable value">
+          <label class="checkbox-row"><input type="checkbox" id="envSecret" checked> secret</label>
+          <button class="btn btn-primary" id="envSave">Save</button>
+        </div>
+        <p class="form-error" id="envError"></p>
+        <div id="envList"></div>
+      </section>
+
+      <section class="tabpane" data-pane="files" hidden>
+        <p class="breadcrumb" id="fileCrumb"></p>
+        <div class="row mb-16">
+          <input type="file" id="fileUploadInput" aria-label="Choose file to upload">
+          <button class="btn btn-sm" id="fileUploadBtn">Upload</button>
+        </div>
+        <div id="fileList"><p class="faint">Loading…</p></div>
+      </section>
+    </div></main>
+  </div>
+</div>
+<dialog id="editorDlg">
+  <h3 style="word-break:break-all" id="editorName">file</h3>
+  <textarea class="input mono" id="editorText" rows="14" aria-label="File content"></textarea>
+  <p class="form-error" id="editorErr"></p>
+  <div class="d-actions">
+    <button class="btn" id="editorCancel" onclick="document.getElementById('editorDlg').close()">Cancel</button>
+    <button class="btn btn-primary" id="editorSave">Save</button>
+  </div>
+</dialog>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/demo.js"></script>
+<script src="/assets/js/app.js"></script>
+<script src="/assets/js/bot-details.js"></script>
+</body>
+</html>
